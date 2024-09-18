@@ -1,0 +1,42 @@
+import requests
+
+
+class scraper:
+    """
+    this class is going to be the scraper object that will be
+    charged with retrieval and storage of log objects.
+    """
+
+    def __init__(self):
+        self.base_url = "https://storage.googleapis.com/wowarenalogs-log-files-prod/"
+
+    def _append_id_to_url(self):
+        """
+        this method will append the proper ID to the url
+        when making the request
+        """
+        self.log_endpoint = self.base_url + f"{self.game_id}"
+
+    def get_og_log_file_given_url(self, url):
+        """
+        given a url, return the log file.
+        """
+        self._obtain_id_from_url(url)
+        self._append_id_to_url()
+        dat = requests.request(method="get", url=self.log_endpoint).text
+        return dat
+
+    def _obtain_id_from_url(self, url):
+        """
+        given a url, find the ID to send in query when obtaining
+        log files.
+        """
+        id_and_after = url.split("id=")
+        self.game_id = id_and_after[1].split("&")[0]
+
+
+if __name__ == "__main__":
+    scraper = scraper()
+    scraper.get_og_log_file_given_url(
+        "https://wowarenalogs.com/match?id=329d757da80143ae9c2c28c45c49b1c2&viewerIsOwner=false&source=search&roundId=5"
+    )
