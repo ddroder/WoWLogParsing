@@ -1,7 +1,6 @@
 import pandas as pd
 
 df = pd.read_csv("test.csv")
-print(df[["destName", "amount", "spellName"]].head())
 # Assuming df is your DataFrame containing the parsed combat log data
 
 # Define damage event types
@@ -15,6 +14,7 @@ damage_events = [
 ]
 
 # Filter the DataFrame for damage events
+print(df[["destName", "amount"]].head())
 damage_df = df[df["event"].isin(damage_events)].copy()
 
 # Ensure 'amount' field is numeric

@@ -41,6 +41,5 @@ class scraper:
 if __name__ == "__main__":
     scraper = scraper()
     scraper.get_og_log_file_given_url(
-        "ttps://wowarenalogs.com/match?id=b33c73864838a74ffc72663c445bff04&viewerIsOwner=false&source=search",
-        True,
+        "https://wowarenalogs.com/match?id=329d757da80143ae9c2c28c45c49b1c2&viewerIsOwner=false&source=search&roundId=5"
     )
