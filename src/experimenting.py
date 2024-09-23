@@ -1,6 +1,8 @@
 import pandas as pd
 
-df = pd.read_csv("test.csv")
+df = pd.read_csv(
+    "/Users/ddroder/code/wow-log-ml/data/game_id_b33c73864838a74ffc72663c445bff04.csv"
+)
 # Assuming df is your DataFrame containing the parsed combat log data
 
 # Define damage event types

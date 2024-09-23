@@ -94,8 +94,9 @@ def parse_log_line(line):
 
 if __name__ == "__main__":
     scraper = scraper()
-    url = "https://wowarenalogs.com/match?id=8ac0be8088ade79236447693b8e86d4d&viewerIsOwner=false&source=search"
+    url = "https://wowarenalogs.com/match?id=b33c73864838a74ffc72663c445bff04&viewerIsOwner=false&source=search"
     log_data = scraper.get_og_log_file_given_url(url)
+    game_id = scraper.game_id
     # Parse the log file
     log_entries = []
 
@@ -113,4 +114,4 @@ if __name__ == "__main__":
 
     # Display the DataFrame
     print(df.head())
-    df.to_csv("test.csv")
+    df.to_csv(f"/Users/ddroder/code/wow-log-ml/data/game_id_{game_id}.csv")
