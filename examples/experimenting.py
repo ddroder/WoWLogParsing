@@ -1,6 +1,7 @@
 import pandas as pd
 
 df = pd.read_csv("test.csv")
+print(df[["destName", "amount", "spellName"]].head())
 # Assuming df is your DataFrame containing the parsed combat log data
 
 # Define damage event types
