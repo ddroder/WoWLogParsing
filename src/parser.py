@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""
-World of Warcraft, Combat Log Parser
----------
-[License and reference information]
-"""
 import re
 from datetime import datetime, timezone, timedelta
 import shlex
@@ -73,7 +65,6 @@ def parse_unit_flag(flag):
         if (f & k) > 0:
             res.append(v)
 
-    # print(f, '->', repr(res))
     return res
 
 
@@ -478,6 +469,7 @@ class VoidSuffixParser:
 
 class Parser:
     def __init__(self):
+        self.player_classes = {}
         self.ev_prefix = {
             "SWING": SwingParser(),
             "SPELL_BUILDING": SpellParser(),
@@ -532,6 +524,85 @@ class Parser:
             "ARENA_MATCH_START": ArenaMatchParser(),
             "ARENA_MATCH_END": ArenaMatchParser(),
             "COMBATANT_INFO": CombatantInfoParser(),
+        }
+
+    def get_class_name_from_spec_id(self, spec_id):
+        spec_to_class_map = {
+            # Death Knight
+            250: "Death Knight",  # Blood
+            251: "Death Knight",  # Frost
+            252: "Death Knight",  # Unholy
+            # Demon Hunter
+            577: "Demon Hunter",  # Havoc
+            581: "Demon Hunter",  # Vengeance
+            # Druid
+            102: "Druid",  # Balance
+            103: "Druid",  # Feral
+            104: "Druid",  # Guardian
+            105: "Druid",  # Restoration
+            # Hunter
+            253: "Hunter",  # Beast Mastery
+            254: "Hunter",  # Marksmanship
+            255: "Hunter",  # Survival
+            # Mage
+            62: "Mage",  # Arcane
+            63: "Mage",  # Fire
+            64: "Mage",  # Frost
+            # Monk
+            268: "Monk",  # Brewmaster
+            270: "Monk",  # Mistweaver
+            269: "Monk",  # Windwalker
+            # Paladin
+            65: "Paladin",  # Holy
+            66: "Paladin",  # Protection
+            70: "Paladin",  # Retribution
+            # Priest
+            256: "Priest",  # Discipline
+            257: "Priest",  # Holy
+            258: "Priest",  # Shadow
+            # Rogue
+            259: "Rogue",  # Assassination
+            260: "Rogue",  # Outlaw
+            261: "Rogue",  # Subtlety
+            # Shaman
+            262: "Shaman",  # Elemental
+            263: "Shaman",  # Enhancement
+            264: "Shaman",  # Restoration
+            # Warlock
+            265: "Warlock",  # Affliction
+            266: "Warlock",  # Demonology
+            267: "Warlock",  # Destruction
+            # Warrior
+            71: "Warrior",  # Arms
+            72: "Warrior",  # Fury
+            73: "Warrior",  # Protection
+            # Evoker (introduced in Dragonflight)
+            1467: "Evoker",  # Devastation
+            1468: "Evoker",  # Preservation
+            1473: "Evoker",  # Augmentation
+        }
+        return spec_to_class_map.get(spec_id, "Unknown")
+
+    def parse_combatant_info(self, cols):
+        event = cols[0]
+        player_guid = cols[1]
+        # The stats are fixed fields; parse up to 'Armor'
+        fixed_fields = cols[2:23]  # Strength to Armor
+        current_spec_id = int(cols[23])
+
+        class_name = self.get_class_name_from_spec_id(current_spec_id)
+        self.player_classes[player_guid] = class_name
+
+        # The rest of the fields are variable-length lists; parse them if needed
+        # ...
+
+        return {
+            "timestamp": ts,
+            "event": event,
+            "playerGUID": player_guid,
+            "currentSpecID": current_spec_id,
+            "className": class_name,
+            # Include other fields if desired
         }
 
     def parse_line(self, line):
@@ -646,6 +717,8 @@ class Parser:
     def parse_cols(self, ts, cols):
         event = cols[0]
 
+        if event == "COMBATANT_INFO":
+            return self.parse_combatant_info(cols)
         if self.enc_event.get(event):
             # Handling encounter events
             obj = {
@@ -690,6 +763,12 @@ class Parser:
                 "destFlags": parse_unit_flag(cols[7]),
                 "destFlags2": parse_unit_flag(cols[8]),
             }
+
+            source_guid = obj.get("sourceGUID")
+            dest_guid = obj.get("destGUID")
+
+            obj["sourceClass"] = self.player_classes.get(source_guid)
+            obj["destClass"] = self.player_classes.get(dest_guid)
 
             suffix = ""
             prefix_psr = None

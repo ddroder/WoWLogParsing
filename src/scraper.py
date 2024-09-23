@@ -25,7 +25,7 @@ class scraper:
         self._append_id_to_url()
         dat = requests.request(method="get", url=self.log_endpoint).text
         if dump_txt:
-            with open("log.txt", "w") as file:
+            with open(f"log_{self.game_id}.txt", "w") as file:
                 file.write(dat)
         return dat
 
